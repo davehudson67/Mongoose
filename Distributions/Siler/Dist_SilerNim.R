@@ -1,7 +1,7 @@
 ## Create custom Siler distribution
 
 RLW0 <- nimbleRcall(function(x = double(0)){}, Rfun = 'lambertW0',
-                    returnType = double(0))
+                   returnType = double(0))
 
 ## use optimise function
 optimiseNim <- nimbleRcall(function(interval = double(1), 

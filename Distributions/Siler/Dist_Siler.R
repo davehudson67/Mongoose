@@ -54,26 +54,30 @@ dSiler <- function(x, a1, a2, b1, b2, c, zL = NA, zU = NA,
   x <- x[, 1]
   
   ## No truncation
-  logS <- (a1 / b1) * (exp(-b1 * x) - 1) - c * x + (a2 / b2) * (1 - exp(b2 * x))
-  logH <- log(a1 * exp(-b1 * x) + c + a2 * exp(b2 * x))
+  logS <- rep(NA, length(x))
+  logH <- rep(NA, length(x))
+  zN_ind <- which(checkPass[, 1] & checkPass[, 2])
+  logS[zN_ind] <- (a1[zN_ind] / b1[zN_ind]) * (exp(-b1[zN_ind] * x[zN_ind]) - 1) - 
+      c[zN_ind] * x[zN_ind] + (a2[zN_ind] / b2[zN_ind]) * (1 - exp(b2[zN_ind] * x[zN_ind]))
+  logH[zN_ind] <- log(a1[zN_ind] * exp(-b1[zN_ind] * x[zN_ind]) + c[zN_ind] + a2[zN_ind] * exp(b2[zN_ind] * x[zN_ind]))
   logProb <- logH + logS
   
   ## Left truncation
-  zL_ind <- which(!is.na(zL) & is.na(zU))
+  zL_ind <- which(!is.na(zL) & is.na(zU) & checkPass[, 1] & checkPass[, 2])
   if(length(zL_ind) > 0) {
       logS_zL <- (a1[zL_ind] / b1[zL_ind]) * (exp(-b1[zL_ind] * zL[zL_ind]) - 1) - c[zL_ind] * zL[zL_ind] + (a2[zL_ind] / b2[zL_ind]) * (1 - exp(b2[zL_ind] * zL[zL_ind]))
       logProb[zL_ind] <- logProb[zL_ind] - logS_zL
   }
   
   ## Right truncation
-  zU_ind <- which(is.na(zL) & !is.na(zU))
+  zU_ind <- which(is.na(zL) & !is.na(zU) & checkPass[, 1] & checkPass[, 2])
   if(length(zU_ind) > 0) {
       logS_zU <- (a1[zU_ind] / b1[zU_ind]) * (exp(-b1[zU_ind] * zU[zU_ind]) - 1) - c[zU_ind] * zU[zU_ind] + (a2[zU_ind] / b2[zU_ind]) * (1 - exp(b2[zU_ind] * zU[zU_ind]))
       logProb[zU_ind] <- logProb[zU_ind] - log(1 - exp(logS_zU))
   }
   
   ## Interval truncation
-  zI_ind <- which(!is.na(zL) & !is.na(zU))
+  zI_ind <- which(!is.na(zL) & !is.na(zU) & checkPass[, 1] & checkPass[, 2])
   if(length(zI_ind) > 0) {
       logS_zL <- (a1[zI_ind] / b1[zI_ind]) * (exp(-b1[zI_ind] * zL[zI_ind]) - 1) - c[zI_ind] * zL[zI_ind] + (a2[zI_ind] / b2[zI_ind]) * (1 - exp(b2[zI_ind] * zL[zI_ind]))
       logS_zU <- (a1[zI_ind] / b1[zI_ind]) * (exp(-b1[zI_ind] * zU[zI_ind]) - 1) - c[zI_ind] * zU[zI_ind] + (a2[zI_ind] / b2[zI_ind]) * (1 - exp(b2[zI_ind] * zU[zI_ind]))
@@ -83,8 +87,8 @@ dSiler <- function(x, a1, a2, b1, b2, c, zL = NA, zU = NA,
   }
   
   ## return correctly
-  logProb[!checkPass[, 1]] <- NA
   logProb[!checkPass[, 2]] <- -Inf
+  logProb[!checkPass[, 1]] <- NA
   
   if(log) {
       return(logProb)
@@ -140,14 +144,14 @@ pSiler <- function(q, a1, a2, b1, b2, c, zL = NA, zU = NA,
   S <- exp(logS)
   
   ## Left truncation
-  zL_ind <- which(!is.na(zL) & is.na(zU))
+  zL_ind <- which(!is.na(zL) & is.na(zU) & checkPass[, 1] & checkPass[, 2] & checkPass[, 3])
   if(length(zL_ind) > 0) {
       logS_zL <- (a1[zL_ind] / b1[zL_ind]) * (exp(-b1[zL_ind] * zL[zL_ind]) - 1) - c[zL_ind] * zL[zL_ind] + (a2[zL_ind] / b2[zL_ind]) * (1 - exp(b2[zL_ind] * zL[zL_ind]))
       logS[zL_ind] <- logS[zL_ind] - logS_zL
   }
   
   ## Right truncation
-  zU_ind <- which(is.na(zL) & !is.na(zU))
+  zU_ind <- which(is.na(zL) & !is.na(zU) & checkPass[, 1] & checkPass[, 2] & checkPass[, 3])
   if(length(zU_ind) > 0) {
       logS_zU <- (a1[zU_ind] / b1[zU_ind]) * (exp(-b1[zU_ind] * zU[zU_ind]) - 1) - c[zU_ind] * zU[zU_ind] + (a2[zU_ind] / b2[zU_ind]) * (1 - exp(b2[zU_ind] * zU[zU_ind]))
       S_zU <- exp(logS_zU)
@@ -155,7 +159,7 @@ pSiler <- function(q, a1, a2, b1, b2, c, zL = NA, zU = NA,
   }
   
   ## Interval truncation
-  zI_ind <- which(!is.na(zL) & !is.na(zU))
+  zI_ind <- which(!is.na(zL) & !is.na(zU) & checkPass[, 1] & checkPass[, 2] & checkPass[, 3])
   if(length(zI_ind) > 0) {
       logS_zLi <- (a1[zI_ind] / b1[zI_ind]) * (exp(-b1[zI_ind] * zL[zI_ind]) - 1) - c[zI_ind] * zL[zI_ind] + (a2[zI_ind] / b2[zI_ind]) * (1 - exp(b2[zI_ind] * zL[zI_ind]))
       logS_zUi <- (a1[zI_ind] / b1[zI_ind]) * (exp(-b1[zI_ind] * zU[zI_ind]) - 1) - c[zI_ind] * zU[zI_ind] + (a2[zI_ind] / b2[zI_ind]) * (1 - exp(b2[zI_ind] * zU[zI_ind]))
@@ -165,16 +169,15 @@ pSiler <- function(q, a1, a2, b1, b2, c, zL = NA, zU = NA,
   }
 
   ## return correctly
+  logS[!checkPass[, 2]] <- 0
+  logS[!checkPass[, 3]] <- -Inf
   logS[!checkPass[, 1]] <- NA
-  logS[!checkPass[, 2]] <- -Inf
-  logS[!checkPass[, 3]] <- 0
   
   if(!lower.tail) { 
     if(log.p) return(logS)
     else return(exp(logS))
   } else {
     p <- 1 - exp(logS)
-    p[!checkPass[, 2]] <- -Inf
     if(!log.p) return(p)
     else return(log(p))
   }
@@ -213,58 +216,63 @@ qSiler <- function(p, a1, a2, b1, b2, c, zL = NA, zU = NA,
   checkPass <- checkPass & (rowSums(x[, -c(1:3), drop = FALSE] > 0) == 5)
   checkPass <- cbind(checkPass, x[, 1] >= 0 & x[, 1] <= 1)
   
-  ## extract vectors as needed
-  zL <- x[, 2]
-  zU <- x[, 3]
-  a1 <- x[, 4]
-  a2 <- x[, 5]
-  b1 <- x[, 6]
-  b2 <- x[, 7]
-  c <- x[, 8]
-  p <- x[, 1]
+  whichPass <- which(checkPass[, 1] & checkPass[, 2])
+  if(length(whichPass) > 0) {
+      ## extract valid entries
+      x <- x[whichPass, , drop = FALSE]
   
-  ## Left truncation
-  zL_ind <- which(!is.na(zL) & is.na(zU))
-  
-  ## Right truncation
-  zU_ind <- which(is.na(zL) & !is.na(zU))
-  
-  ## Interval truncation
-  zI_ind <- which(!is.na(zL) & !is.na(zU))
-
-  ## No truncation
-  zN_ind <- which(is.na(zL) & is.na(zU))
-  
-  ## set/find upper bound
-  qU <- rep(10, times = length(p))
-  qU[zU_ind] <- zU[zU_ind]
-  qU[zI_ind] <- zU[zI_ind]
-  
-  ## amend upper bound if necessary
-  zNo_ind <- c(zN_ind, zL_ind)
-  while(length(zNo_ind) > 0) {
-    pTarget <- p[zNo_ind]
-    pU <- pSiler(qU[zNo_ind], a1[zNo_ind], a2[zNo_ind], b1[zNo_ind], b2[zNo_ind], c[zNo_ind])
-    zNo_ind <- zNo_ind[pU < pTarget]
-    pU <- pU[pU < pTarget]
-    while(length(zNo_ind) > 0) {
-      qU[zNo_ind] <- qU[zNo_ind] + 10
-    }
+      ## extract vectors as needed
+      zL <- x[, 2]
+      zU <- x[, 3]
+      a1 <- x[, 4]
+      a2 <- x[, 5]
+      b1 <- x[, 6]
+      b2 <- x[, 7]
+      c <- x[, 8]
+      p <- x[, 1]
+      
+      ## Left truncation
+      zL_ind <- which(!is.na(zL) & is.na(zU))
+      
+      ## Right truncation
+      zU_ind <- which(is.na(zL) & !is.na(zU))
+      
+      ## Interval truncation
+      zI_ind <- which(!is.na(zL) & !is.na(zU))
+    
+      ## No truncation
+      zN_ind <- which(is.na(zL) & is.na(zU))
+      
+      ## set/find upper bound
+      qU <- rep(10, times = length(p))
+      qU[zU_ind] <- zU[zU_ind]
+      qU[zI_ind] <- zU[zI_ind]
+      
+      ## amend upper bound if necessary
+      zNo_ind <- c(zN_ind, zL_ind)
+      while(length(zNo_ind) > 0) {
+        pTarget <- p[zNo_ind]
+        pU <- pSiler(qU[zNo_ind], a1[zNo_ind], a2[zNo_ind], b1[zNo_ind], b2[zNo_ind], c[zNo_ind])
+        zNo_ind <- zNo_ind[pU < pTarget]
+        pU <- pU[pU < pTarget]
+        while(length(zNo_ind) > 0) {
+          qU[zNo_ind] <- qU[zNo_ind] + 10
+        }
+      }
+      
+      ## set lower bound
+      qL <- rep(0, times = length(p))
+      qL[zL_ind] <- zL[zL_ind]
+      qL[zI_ind] <- zL[zI_ind]
+      
+      data <- cbind(qL, qU, a1, a2, b1, b2, c, zL, zU, p)
+      out <- rep(NA, ntot)
+      out[whichPass] <- apply(data, 1, function(x) {
+          optimiseR(x[1:2], x[3], x[4], x[5], x[6], x[7], x[8], x[9], x[10])
+      })
+  } else {
+      out <- rep(NA, ntot)
   }
-  
-  ## set lower bound
-  qL <- rep(0, times = length(p))
-  qL[zL_ind] <- zL[zL_ind]
-  qL[zI_ind] <- zL[zI_ind]
-  
-  data <- cbind(qL, qU, a1, a2, b1, b2, c, zL, zU, p)
-  out <- apply(data, 1, function(x) {
-      optimiseR(x[1:2], x[3], x[4], x[5], x[6], x[7], x[8], x[9], x[10])
-  })
-  
-  ## return correctly
-  out[!checkPass[, 1]] <- NA
-  out[!checkPass[, 2]] <- NA
   return(out)
 }
 
@@ -319,8 +327,8 @@ rSiler <- function(n, a1, a2, b1, b2, c, zL = NA, zU = NA) {
   rs <- rep(NA, n)
   
   ## no truncation and/or left-truncation
-  zN_ind <- which(is.na(zL) & is.na(zU))
-  zL_ind <- which(!is.na(zL) & is.na(zU))
+  zN_ind <- which(is.na(zL) & is.na(zU) & checkPass)
+  zL_ind <- which(!is.na(zL) & is.na(zU) & checkPass)
   zNL_ind <- c(zN_ind, zL_ind)
   nNL <- length(zNL_ind)
   if(nNL > 0) {
@@ -354,28 +362,17 @@ rSiler <- function(n, a1, a2, b1, b2, c, zL = NA, zU = NA) {
   }
   
   ## Right truncation
-  zU_ind <- which(is.na(zL) & !is.na(zU))
+  zU_ind <- which(is.na(zL) & !is.na(zU) & checkPass)
   if(length(zU_ind) > 0) {
     rs[zU_ind] <- qSiler(runif(length(zU_ind), 0, 1), a1[zU_ind], a2[zU_ind], b1[zU_ind], b2[zU_ind], c[zU_ind], zL[zU_ind], zU[zU_ind])
   }
   
   ## Interval truncation
-  zI_ind <- which(!is.na(zL) & !is.na(zU))
+  zI_ind <- which(!is.na(zL) & !is.na(zU) & checkPass)
   if(length(zI_ind) > 0) {
     rs[zI_ind] <- qSiler(runif(length(zI_ind), 0, 1), a1[zI_ind], a2[zI_ind], b1[zI_ind], b2[zI_ind], c[zI_ind], zL[zI_ind], zU[zI_ind])
   }
   
   ## return correctly
-  rs[!checkPass] <- NA
   return(rs)
 }
-
-## register distributions with NIMBLE
-#registerDistributions(list(
-#  dSiler = list(
-#    BUGSdist = "dSiler(a1, a2, b1, b2, c, zL, zU)",
-#    Rdist = "dSiler(a1, a2, b1, b2, c, zL, zU)",
-#    pqAvail = TRUE, 
-#    range = c(0, Inf)
-#  )
-#))
