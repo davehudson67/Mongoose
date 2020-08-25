@@ -77,6 +77,6 @@ saveRDS(mong, file = "mong.rds")
 ## Partial likelihood
 attach(mong)
 mong.s <- Surv(dur, dead)
-mong.sfit <- coxph(mong.s ~ escort.index * sex.y)
+mong.sfit <- coxph(mong.s ~ escort.index * sex.y, ties = "breslow")
 summary(mong.sfit)
-
+ 
