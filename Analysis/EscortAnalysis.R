@@ -53,7 +53,7 @@ for (i in 1:nrow(mong)){
 
 
 #Create death day variable
-mong$death_day <- ifelse((mong$code=="DIED" | mong$code=="LOST" | mong$code=="LSEEN"), mong$daten, 0)
+mong$death_day <- ifelse((mong$code=="DIED" | mong$code=="LOST" | mong$code=="LSEEN"), mong$daten, max(mong$daten))
 mong <- arrange(mong, indiv, desc(daten)) 
 
 for (i in 1:nrow(mong)){
@@ -61,13 +61,13 @@ for (i in 1:nrow(mong)){
 }
 
 ## Set up survival variables
-mong$dead <- ifelse(mong$death_day>0, 1, 0) #needs to be numeric
+mong$dead <- ifelse(mong$death_day < max(mong$daten), 1, 0) #needs to be numeric
 mong$dur <- mong$death_day - mong$birth_day
 mong.CV<- data.table(mong)
 
 ## keep only unique entries
 mong <- distinct(mong, mong$indiv, .keep_all = TRUE)
-
+summary(mong)
 ## adjust birth date to reflect time spent underground before being available for capture
 mong$birth_day <- mong$birth_day - 21
 

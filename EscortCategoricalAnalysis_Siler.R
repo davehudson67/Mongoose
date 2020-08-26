@@ -34,9 +34,9 @@ for (i in 1:nrow(mong)){
   if(mong$escort.index[i] <= 0.35) {
     mong$Esc[i] <- 1
   } else if (mong$escort.index[i] > 0.6) {
-    mong$Esc[i] <- 2
-  } else {
     mong$Esc[i] <- 3
+  } else {
+    mong$Esc[i] <- 2
   }
 }
 

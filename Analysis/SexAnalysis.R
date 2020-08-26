@@ -25,7 +25,7 @@ mong<-mong[mong$sex=="M" | mong$sex=="F"]
 
 
 #Create birth day variable
-mong$birth_day<- ifelse(mong$code=="BORN", mong$daten -30 , 0)
+mong$birth_day<- ifelse(mong$code=="BORN", mong$daten , 0)
 mong<- mong[order(mong[,4], mong[,1]),]
 for (i in 1:nrow(mong)){
   ifelse(mong$indiv[i]!=(mong$indiv[i-1]), mong$birth_day[i]<-mong$birth_day[i], mong$birth_day[i]<-mong$birth_day[i-1])
@@ -35,7 +35,7 @@ for (i in 1:nrow(mong)){
 levels(mong$code)[4]<-"LOST"
 
 #Create death year variable
-mong$death_day<- ifelse((mong$code=="DIED" | mong$code=="LOST"), mong$daten, 0)
+mong$death_day<- ifelse((mong$code=="DIED" | mong$code=="LOST" | mong$code=="LSEEN"), mong$daten, 0)
 mong<- arrange(mong, indiv, desc(daten)) 
 for (i in 1:nrow(mong)){
   ifelse(mong$indiv[i]!=(mong$indiv[i-1]), mong$death_day[i]<-mong$death_day[i], mong$death_day[i]<-mong$death_day[i-1])
