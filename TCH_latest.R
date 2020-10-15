@@ -64,7 +64,9 @@ mong.CV<- data.table(mong)
 mong.CV<- distinct(mong.CV, mong.CV$indiv, .keep_all = TRUE)
 
 summary(mong.CV)
-
+mong.CV <- as.data.table(mong.CV)
+mong.CV <- mong.CV[mong.CV$sex == "M" | mong.CV$sex == "F"]
+mong.CV <- droplevels(mong.CV)
 
 #Save
 #saveRDS(CP.CJS.array, file='CP.CJS.array.rds')
